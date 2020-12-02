@@ -1,9 +1,13 @@
 {
   "name": "@tsh96/nest-typegoose-crud",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "bin": {
     "codegen": "dist/codegen/index.js"
+  },
+  "homepage": "https://github.com/tsh96/nest-typegoose-crud",
+  "bugs": {
+    "url": "https://github.com/tsh96/nest-typegoose-crud"
   },
   "main": "dist/index.js",
   "dependencies": {
