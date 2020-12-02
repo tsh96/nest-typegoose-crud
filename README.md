@@ -1,10 +1,11 @@
 <div align="center">
-  <h1>Nest Mongoose Crud</h1>
+  <h1>Nest Typegoose Crud</h1>
 </div>
 
 # Description
 
 This package provides several decorators and classes for endpoints generation, model validation, and access control
+If you are looking for mongoose version, please move to [@tsh96/nest-mongoose-crud](https://github.com/tsh96/nest-mongoose-crud)
 
 # Features
 
@@ -24,15 +25,13 @@ Create a new nestjs project and install following dependencies.
 Yarn (Recommended)
 
 ```bash
-yarn add @tsh96/nest-mongoose-crud class-transformer class-validator @nestjs/swagger @nestjs/mongoose mongoose
-yarn add -D @types/mongoose
+yarn add @tsh96/nest-typegoose-crud class-transformer class-validator @nestjs/swagger @typegoose/typegoose nestjs-typegoose
 ```
 
 Npm
 
 ```bash
-npm install @tsh96/nest-mongoose-crud class-transformer class-validator @nestjs/swagger @nestjs/mongoose mongoose
-npm install @types/mongoose
+npm install @tsh96/nest-typegoose-crud class-transformer class-validator @nestjs/swagger @typegoose/typegoose nestjs-typegoose
 ```
 
 # Getting started
@@ -49,11 +48,11 @@ For example `yarn codegen cat` will create a files under `src/cat` folder and `y
 
 ## Manually
 
-Create a mongoose schema
+Create a typegoose schema
 
 ```ts
 // dog.schema.ts
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { prop } from '@typegoose/typegoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 import { Document } from 'mongoose';
@@ -62,23 +61,21 @@ export type DogDocument = Dog & Document;
 
 @Schema()
 export class Dog {
-  @Prop() // For mongoose
+  @prop() // For typegoose
   @ApiProperty() // For swagger
   @IsString() // For class validator
   name: string;
 
-  @Prop() // For mongoose
+  @prop() // For typegoose
   @ApiProperty() // For swagger
   @IsNumber() // For class validator
   age: number;
 
-  @Prop() // For mongoose
+  @prop() // For typegoose
   @ApiProperty() // For swagger
   @IsString() // For class validator
   breed: string;
 }
-
-export const DogSchema = SchemaFactory.createForClass(Dog);
 ```
 
 Create Dto(s) for services:
@@ -126,19 +123,19 @@ Then create a crud service. Must have **CrudInjectable** decorator and extends *
 ```ts
 //dog.service.ts
 import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectModel } from 'nestjs-typegoose';
 import { Dog, DogDocument } from './dog.schema';
 import { CreateDogDto, UpdateDogDto } from './dog.dto';
-import { CrudInjectable, CrudService } from 'nest-mongoose-crud';
+import { CrudInjectable, CrudService } from '@tsh96/nest-typegoose-crud';
 
 @CrudInjectable({
   createDto: CreateDogDto,
   updateDto: UpdateDogDto,
   mongooseModel: Dog,
   filterQuery: UpdateDogDto,
-}) // For Crud Service
+})
 export class DogsService extends CrudService {
-  constructor(@InjectModel(Dog.name) dogModel: Model<DogDocument>) {
+  constructor(@InjectModel(Dog) dogModel: Model<DogDocument>) {
     super(dogModel);
   }
 }
@@ -148,14 +145,14 @@ Create a controller. Must have **Crud** decorator and extends **CrudController**
 
 ```ts
 //dogs.controller.ts
-import { ParseArrayPipe } from '@nestjs/common';
+import { ParseArrayPipe, ParseIntPipe } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { AuthResource, Crud, CrudController } from 'nest-mongoose-crud';
-import { DogsService } from './dog.service';
+import { AuthResource, Crud, CrudController } from '@tsh96/nest-typegoose-crud';
+import { DogsService } from './dogs.service';
 
-@ApiBearerAuth() // For Swagger Api
-@AuthResource('dog') // For Access Control (Roles Guard)
-@Crud('dogs', { crudService: DogsService, ParseArrayPipe }) // For Crud Controller
+@ApiBearerAuth()
+@AuthResource('dogs')
+@Crud('dogs', { crudService: DogsService, ParseArrayPipe, ParseIntPipe })
 export class DogsController extends CrudController<DogsService, any> {
   constructor(readonly service: DogsService) {
     super(service);
@@ -168,17 +165,13 @@ Connect controller and service with a module
 ```ts
 //dogs.module.ts
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Dog, DogSchema } from './dog.schema';
+import { TypegooseModule } from 'nestjs-typegoose';
+import { Dog } from './dog.schema';
 import { DogsController } from './dogs.controller';
-import { DogsService } from './dog.service';
-import { JwtAuthModule } from 'src/jwt-auth/jwt-auth.module';
+import { DogsService } from './dogs.service';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Dog.name, schema: DogSchema }]),
-    JwtAuthModule,
-  ],
+  imports: [TypegooseModule.forFeature([Dog])],
   controllers: [DogsController],
   providers: [DogsService],
 })
@@ -211,7 +204,7 @@ import {
   AuthActions,
   Crud,
   CrudController,
-} from 'nest-mongoose-crud';
+} from 'nest-typegoose-crud';
 import { DogsService } from './dog.service';
 
 @ApiBearerAuth() // For Swagger Api
@@ -285,7 +278,7 @@ Services also:
   filterQuery: UpdateDogDto,
 }) // For Crud Service
 export class DogsService extends CrudService {
-  constructor(@InjectModel(Dog.name) dogModel: Model<DogDocument>) {
+  constructor(@InjectModel(Dog) dogModel: Model<DogDocument>) {
     super(dogModel);
   }
 
