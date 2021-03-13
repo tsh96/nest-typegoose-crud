@@ -2,6 +2,9 @@
   <h1>Nest Typegoose Crud</h1>
 </div>
 
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+# ⚠️ DEPRECATED ⚠️
+This is no longer updated, please consider using other library.
 # Description
 
 This package provides several decorators and classes for endpoints generation, model validation, and access control
